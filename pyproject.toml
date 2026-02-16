@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "noonapi"
+version = "0.1.0"
+description = "Official Python SDK for noon partner APIs"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "noon", email = "api-platform@noon.com" }]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: Apache Software License",
+  "Typing :: Typed",
+]
+
+dependencies = [
+  "requests>=2.31",
+  "PyJWT[crypto]>=2.8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/noonapi"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "README.md", "LICENSE", "pyproject.toml"]
+
+[dependency-groups]
+dev = [
+    "build>=1.4.0",
+    "pre-commit>=4.3.0",
+    "ruff>=0.15.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["UP007", "UP045"]
+
+
+
