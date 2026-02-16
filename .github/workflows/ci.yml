@@ -6,7 +6,7 @@ on:
     branches: ["master"]
 
 jobs:
-  lint-and-build:
+  validate:
     runs-on: ubuntu-latest
 
     strategy:
@@ -35,3 +35,10 @@ jobs:
 
       - name: Build package
         run: uv run python -m build
+
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [validate]
+    steps:
+      - run: echo "CI passed"
