@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "noonapi"
-version = "0.1.0"
+version = "0.1.1"
 description = "Official Python SDK for noon partner APIs"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
-authors = [{ name = "noon", email = "api-platform@noon.com" }]
+authors = [{ name = "noon", email = "scintegerationsupport@noon.com" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3",
