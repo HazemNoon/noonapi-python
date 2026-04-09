@@ -1,5 +1,6 @@
 .venv
 .venv/*
+openapi/swagger
 
 uv.lock
 __pycache__/
