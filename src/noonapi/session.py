@@ -6,6 +6,7 @@ import requests
 
 from .credentials import NoonCredentials
 from .services.auth import AuthService
+from .services.fbpi import FbpiService
 
 
 class NoonSession:
@@ -16,6 +17,7 @@ class NoonSession:
       - partner credentials
       - auto re-auth + retry-once behavior on HTTP 401
       - auth namespace: session.auth.*
+      - fbpi namespace: session.fbpi.*
     """
 
     def __init__(
@@ -58,6 +60,7 @@ class NoonSession:
             timeout_s=self.timeout_s,
             verify_whoami_on_login=verify_whoami_on_login,
         )
+        self.fbpi = FbpiService(self)
 
         if self.auto_login:
             self.auth.login()

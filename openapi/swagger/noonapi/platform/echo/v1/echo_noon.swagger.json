@@ -1,0 +1,263 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "Echo"
+    }
+  ],
+  "host": "noon-api-gateway.noon.partners",
+  "basePath": "/echo",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/echo": {
+      "get": {
+        "summary": "GetEcho",
+        "description": "Returns a simple echo message",
+        "operationId": "Echo_GetEcho",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetEchoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Echo"
+        ],
+        "x-max-requests": 10,
+        "x-time-window": 30,
+        "x-burst": 5,
+        "x-burst-time-window": 10
+      },
+      "post": {
+        "summary": "PostEcho",
+        "description": "Given a custom message in the request body, it returns it in an echo message",
+        "operationId": "Echo_PostEcho",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1PostEchoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1PostEchoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Echo"
+        ],
+        "x-max-requests": 10,
+        "x-time-window": 60,
+        "x-burst": 10,
+        "x-burst-time-window": 30
+      }
+    },
+    "/v1/{tag}/echo": {
+      "get": {
+        "summary": "GetEchoByTag",
+        "description": "Returns a special echo message using a path param called tag",
+        "operationId": "Echo_GetEchoByTag",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetEchoByTagResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tag",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Echo"
+        ],
+        "x-max-requests": 10,
+        "x-time-window": 60,
+        "x-burst": 10,
+        "x-burst-time-window": 30
+      }
+    },
+    "/v1/optional-echo": {
+      "post": {
+        "summary": "OptionalPostEcho",
+        "description": "Returns a custom echo message using an optional field in the request body",
+        "operationId": "Echo_OptionalPostEcho",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OptionalPostEchoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1OptionalPostEchoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Echo"
+        ],
+        "x-max-requests": 10,
+        "x-time-window": 60,
+        "x-burst": 10,
+        "x-burst-time-window": 30
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "v1GetEchoByTagResponse": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "echo"
+      ]
+    },
+    "v1GetEchoResponse": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "echo"
+      ]
+    },
+    "v1OptionalPostEchoRequest": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "is_active": {
+          "type": "boolean",
+          "x-nullable": true
+        }
+      }
+    },
+    "v1OptionalPostEchoResponse": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "echo"
+      ]
+    },
+    "v1PostEchoRequest": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "echo"
+      ]
+    },
+    "v1PostEchoResponse": {
+      "type": "object",
+      "properties": {
+        "echo": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "echo"
+      ]
+    }
+  }
+}

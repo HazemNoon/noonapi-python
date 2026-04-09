@@ -1,0 +1,222 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "OfferService"
+    }
+  ],
+  "host": "noon-api-gateway.noon.partners",
+  "basePath": "/offer",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/product/{partner_sku}": {
+      "get": {
+        "summary": "GetProductOffers",
+        "description": "Retrieves offer details for a given partner SKU across all countries.",
+        "operationId": "OfferService_GetProductOffers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetProductOffersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "partner_sku",
+            "description": "Your internal unique identifier for the product.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Product"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "v1GetProductOffersResponse": {
+      "type": "object",
+      "properties": {
+        "partner_sku": {
+          "type": "string",
+          "description": "Partner provided SKU identifier."
+        },
+        "sku": {
+          "type": "string",
+          "description": "Noon SKU identifier."
+        },
+        "title": {
+          "type": "string",
+          "description": "Product title."
+        },
+        "brand": {
+          "type": "string",
+          "description": "Product brand name."
+        },
+        "offers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Offer"
+          },
+          "description": "List of offers across different countries."
+        }
+      },
+      "required": [
+        "partner_sku",
+        "sku",
+        "title",
+        "brand",
+        "offers"
+      ]
+    },
+    "v1Offer": {
+      "type": "object",
+      "properties": {
+        "offer_code": {
+          "type": "string",
+          "description": "Unique offer identifier."
+        },
+        "country_code": {
+          "type": "string",
+          "description": "The country in which the offer is available (e.g., ae, sa, eg)."
+        },
+        "business_model": {
+          "type": "string",
+          "description": "The business model under which the offer is available (e.g., noon, supermall)."
+        },
+        "price": {
+          "$ref": "#/definitions/v1OfferPrice",
+          "x-nullable": true,
+          "description": "Current price of the offer."
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Whether the product offer is active for this business model and country."
+        },
+        "active_net_stock": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Available net stock for the offer."
+        },
+        "live_status": {
+          "type": "boolean",
+          "description": "Whether the offer is currently live on the storefront."
+        },
+        "offer_issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1OfferIssue"
+          },
+          "description": "List of issues due to which the offer is not live."
+        }
+      },
+      "required": [
+        "offer_code",
+        "country_code",
+        "business_model",
+        "is_active",
+        "active_net_stock",
+        "live_status",
+        "offer_issues"
+      ]
+    },
+    "v1OfferIssue": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "description": "The issue reason."
+        },
+        "subreason": {
+          "type": "string",
+          "description": "The issue sub-reason."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the issue."
+        }
+      },
+      "required": [
+        "reason",
+        "subreason",
+        "description"
+      ]
+    },
+    "v1OfferPrice": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "description": "Price amount."
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency code (e.g., AED, SAR, EGP)."
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ]
+    }
+  }
+}

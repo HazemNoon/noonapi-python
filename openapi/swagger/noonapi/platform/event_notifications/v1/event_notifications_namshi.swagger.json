@@ -1,0 +1,255 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "EventNotificationsService"
+    }
+  ],
+  "host": "namshi-api-gateway.noon.partners",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/create-webhook": {
+      "post": {
+        "summary": "CreateWebhook",
+        "description": "Creates a new webhook",
+        "operationId": "EventNotificationsService_CreateWebhook",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateWebhookResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateWebhookRequest"
+            }
+          }
+        ],
+        "tags": [
+          "webhook"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/create-subscription": {
+      "post": {
+        "summary": "CreateSubscription",
+        "description": "Create a new webhook subscription",
+        "operationId": "EventNotificationsService_CreateSubscription",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateSubscriptionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateSubscriptionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "subscription"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/webhook/assign-developer": {
+      "post": {
+        "summary": "AssignDeveloperToWebhook",
+        "description": "Add a mapping between a webhook and the seller's authorized developer",
+        "operationId": "EventNotificationsService_AssignDeveloperToWebhook",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AssignDeveloperToWebhookResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AssignDeveloperToWebhookRequest"
+            }
+          }
+        ],
+        "tags": [
+          "webhook"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "v1AssignDeveloperToWebhookRequest": {
+      "type": "object",
+      "properties": {
+        "dev_code": {
+          "type": "string"
+        },
+        "webhook_code": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dev_code",
+        "webhook_code"
+      ]
+    },
+    "v1AssignDeveloperToWebhookResponse": {
+      "type": "object",
+      "properties": {
+        "webhook_code": {
+          "type": "string"
+        },
+        "dev_code": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "webhook_code",
+        "dev_code"
+      ]
+    },
+    "v1CreateSubscriptionRequest": {
+      "type": "object",
+      "properties": {
+        "webhook_code": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "webhook_code",
+        "event_type"
+      ]
+    },
+    "v1CreateSubscriptionResponse": {
+      "type": "object",
+      "properties": {
+        "subscription_code": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "subscription_code"
+      ]
+    },
+    "v1CreateWebhookRequest": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "credentials": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "url",
+        "credentials"
+      ]
+    },
+    "v1CreateWebhookResponse": {
+      "type": "object",
+      "properties": {
+        "webhook_code": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "webhook_code"
+      ]
+    }
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "ReturnOrdersService"
+    }
+  ],
+  "host": "namshi-api-gateway.noon.partners",
+  "basePath": "/customer-returns",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/order/returns": {
+      "post": {
+        "summary": "GetCustomerReturnOrders",
+        "description": "Fetch details of customer return orders by order numbers",
+        "operationId": "ReturnOrdersService_BatchGetCustomerReturnOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1BatchGetCustomerReturnOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1BatchGetCustomerReturnOrdersRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Customer return orders"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "v1BatchGetCustomerReturnOrdersRequest": {
+      "type": "object",
+      "properties": {
+        "order_nrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "order_nrs"
+      ]
+    },
+    "v1BatchGetCustomerReturnOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1OrderReturnItem"
+          }
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "v1OrderReturnItem": {
+      "type": "object",
+      "properties": {
+        "order_nr": {
+          "type": "string"
+        },
+        "purchase_item_nr": {
+          "type": "string"
+        },
+        "return_item_nr": {
+          "type": "string"
+        },
+        "awb_nr": {
+          "type": "string"
+        },
+        "barcode": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "order_nr",
+        "purchase_item_nr",
+        "return_item_nr",
+        "awb_nr",
+        "barcode",
+        "status"
+      ]
+    }
+  }
+}

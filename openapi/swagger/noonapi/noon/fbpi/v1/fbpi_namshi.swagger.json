@@ -1,0 +1,842 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "FbpiService"
+    }
+  ],
+  "host": "namshi-api-gateway.noon.partners",
+  "basePath": "/fbpi",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/shipment/create": {
+      "post": {
+        "summary": "CreateShipment",
+        "description": "Used to create a shipment for an order.\nEach shipment must have a unique integration_shipment_nr and a valid AWB (Air Waybill) number.\nYou can either use a Noon-generated AWB or your own courier’s AWB.",
+        "operationId": "FbpiService_CreateShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateShipmentRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/courier-awbs/add": {
+      "post": {
+        "summary": "AddShipmentCourierAwbs",
+        "description": "Allows adding the courier and AWB number in case warehouse operations encounter scanning issues with the current one.",
+        "operationId": "FbpiService_AddShipmentCourierAwbs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1AddShipmentCourierAwbsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/cancel": {
+      "post": {
+        "summary": "CancelShipment",
+        "description": "Cancels an existing shipment.\nAll items included in that shipment will also be canceled",
+        "operationId": "FbpiService_CancelShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CancelShipmentRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/get": {
+      "post": {
+        "summary": "GetShipment",
+        "description": "Retrieves shipment details for a specific order and shipment number.",
+        "operationId": "FbpiService_GetShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetShipmentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GetShipmentRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/noon-logistics-awbs/get": {
+      "post": {
+        "summary": "GetNoonLogisticsAWBs",
+        "description": "Generates Noon AWB numbers to be used when creating shipments.\nYou can generate a single AWB per shipment or request up to 1000 AWBs in bulk and store them for future use.",
+        "operationId": "FbpiService_GetNoonLogisticsAWBs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetNoonLogisticsAWBsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GetNoonLogisticsAWBsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/fbpi-order/{fbpi_order_nr}/get": {
+      "get": {
+        "summary": "GetFbpiOrder",
+        "description": "A webhook will be sent to your system containing theorder details whenever an order is created from the marketplace (Noon or Namshi).\nYou can then use the fbpi_order_nr from the webhookto call this endpoint and retrieve full order details.",
+        "operationId": "FbpiService_GetFbpiOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetFbpiOrderResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fbpi_order_nr",
+            "description": "The order number used in the request.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "FBPI Order"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/fbpi-orders/list": {
+      "post": {
+        "summary": "ListFbpiOrders",
+        "description": "Retrieves a paginated list of FBPI orders for a specific warehouse with optional filtering by order creation date range.\n\nUse the created_after and created_before filters to  limit results to orders created within a specific UTC time window.If no date filters are provided,all available orders for the specified warehouse will be returned.Results are returned in pages of up to 50 orders.\n\nTo retrieve additional pages,include the next_token query parameter returned in the previous response. When paginating, you must reuse the same filters applied in the initial request. The next_token controls pagination only and does not modify the result set.",
+        "operationId": "FbpiService_ListFbpiOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListFbpiOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filters",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ListFbpiOrdersFilters"
+            }
+          },
+          {
+            "name": "next_token",
+            "description": "used for pagination. When requesting pages after the \nfirst, provide the token returned by your previous request, and do not change the filters applied\nin the first page when sending the token.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "FBPI Order"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/fbpi-order/{fbpi_order_nr}/customer-details/get": {
+      "get": {
+        "summary": "GetFbpiOrderCustomerData",
+        "description": "Provides customer details for a given FBPI order, including their name, city, and administrative division.",
+        "operationId": "FbpiService_GetFbpiOrderCustomerData",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetFbpiOrderCustomerDataResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fbpi_order_nr",
+            "description": "The FBPI order number you received via webhook.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "FBPI Order"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/fbpi-order/update": {
+      "post": {
+        "summary": "UpdateOrder",
+        "description": "If the warehouse stock does not match the received order,this API allows you to mark one or more items as unavailable before shipment creation.\nThe unavailable items will be canceled on Noon’s side,and the rest will proceed to fulfillment.",
+        "operationId": "FbpiService_UpdateOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "FBPI Order"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "v1AddShipmentCourierAwbsRequest": {
+      "type": "object",
+      "properties": {
+        "warehouse_code": {
+          "type": "string",
+          "description": "Integration warehouse code."
+        },
+        "integration_shipment_nr": {
+          "type": "string",
+          "description": "The shipment identifier to update."
+        },
+        "awbs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ShipmentCourierAwb"
+          },
+          "description": "courier and AWB details to be added."
+        }
+      },
+      "required": [
+        "warehouse_code",
+        "integration_shipment_nr",
+        "awbs"
+      ]
+    },
+    "v1CancelShipmentRequest": {
+      "type": "object",
+      "properties": {
+        "warehouse_code": {
+          "type": "string",
+          "description": "Integration warehouse code."
+        },
+        "integration_shipment_nr": {
+          "type": "string",
+          "description": "Shipment number to be canceled."
+        }
+      },
+      "required": [
+        "warehouse_code",
+        "integration_shipment_nr"
+      ]
+    },
+    "v1CreateShipmentItem": {
+      "type": "object",
+      "properties": {
+        "mp_item_nr": {
+          "type": "string",
+          "description": "Marketplace item number to be included in this shipment."
+        }
+      },
+      "required": [
+        "mp_item_nr"
+      ]
+    },
+    "v1CreateShipmentRequest": {
+      "type": "object",
+      "properties": {
+        "warehouse_code": {
+          "type": "string",
+          "description": "The integration warehouse code handling the order."
+        },
+        "integration_shipment_nr": {
+          "type": "string",
+          "description": "Unique identifier for the shipment, No specific format enforced."
+        },
+        "fbpi_order_nr": {
+          "type": "string",
+          "description": "The FBPI order number linked to this shipment."
+        },
+        "awbs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ShipmentCourierAwb"
+          },
+          "description": "Array containing courier and AWB number details."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1CreateShipmentItem"
+          },
+          "description": "Array of items included in this shipment."
+        }
+      },
+      "required": [
+        "warehouse_code",
+        "integration_shipment_nr",
+        "fbpi_order_nr",
+        "awbs",
+        "items"
+      ]
+    },
+    "v1GetFbpiOrderCustomerDataResponse": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string",
+          "description": "Customer first name in latin characters."
+        },
+        "last_name": {
+          "type": "string",
+          "description": "Customer last name in latin characters."
+        },
+        "city": {
+          "type": "string",
+          "description": "Customer city in latin characters."
+        },
+        "administrative_division": {
+          "type": "string",
+          "description": "Customer administrative division in latin characters."
+        }
+      },
+      "required": [
+        "first_name",
+        "last_name",
+        "city",
+        "administrative_division"
+      ]
+    },
+    "v1GetFbpiOrderResponse": {
+      "type": "object",
+      "properties": {
+        "fbpi_order_nr": {
+          "type": "string",
+          "description": "The order number passed in the request."
+        },
+        "mp_code": {
+          "type": "string",
+          "description": "Marketplace source: 'noon' or 'namshi'."
+        },
+        "mp_order_nr": {
+          "type": "string",
+          "description": "The marketplace order number retrieved from the Order."
+        },
+        "mp_country_code": {
+          "type": "string",
+          "description": "Marketplace country code (e.g., ae, sa, eg)."
+        },
+        "customer_country_code": {
+          "type": "string",
+          "description": "The country from which the customer placed the order."
+        },
+        "merchant_code": {
+          "type": "string",
+          "description": "The merchant identifier, prefixed with STR."
+        },
+        "currency_code": {
+          "type": "string",
+          "description": "The customer’s local currency."
+        },
+        "warehouse_code": {
+          "type": "string",
+          "description": "Integration warehouse code where the order will be fulfilled."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GetFbpiOrderResponseItem"
+          },
+          "description": "Array of items included in the order."
+        },
+        "order_created_at": {
+          "type": "string",
+          "description": "Timestamp of when the order was created."
+        }
+      },
+      "required": [
+        "fbpi_order_nr",
+        "mp_code",
+        "mp_order_nr",
+        "mp_country_code",
+        "customer_country_code",
+        "merchant_code",
+        "currency_code",
+        "warehouse_code",
+        "items",
+        "order_created_at"
+      ]
+    },
+    "v1GetFbpiOrderResponseItem": {
+      "type": "object",
+      "properties": {
+        "mp_item_nr": {
+          "type": "string"
+        },
+        "partner_sku": {
+          "type": "string"
+        },
+        "mp_status": {
+          "$ref": "#/definitions/v1MPItemStatus"
+        },
+        "integration_status": {
+          "$ref": "#/definitions/v1IntegrationItemStatus"
+        },
+        "delivered_invoice_price": {
+          "type": "number",
+          "format": "double"
+        },
+        "cancellation_reason_code": {
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": [
+        "mp_item_nr",
+        "partner_sku",
+        "mp_status",
+        "integration_status",
+        "delivered_invoice_price"
+      ]
+    },
+    "v1GetNoonLogisticsAWBsRequest": {
+      "type": "object",
+      "properties": {
+        "country_code": {
+          "type": "string",
+          "description": "Operating warehouse country code (e.g., ae, sa, eg)."
+        },
+        "qty": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Number of AWBs to generate. Maximum 1000 per request."
+        }
+      },
+      "required": [
+        "country_code",
+        "qty"
+      ]
+    },
+    "v1GetNoonLogisticsAWBsResponse": {
+      "type": "object",
+      "properties": {
+        "awb_nrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "awb_nrs"
+      ]
+    },
+    "v1GetShipmentRequest": {
+      "type": "object",
+      "properties": {
+        "warehouse_code": {
+          "type": "string",
+          "description": "The FBPI order number for which shipment details are requested."
+        },
+        "integration_shipment_nr": {
+          "type": "string",
+          "description": "The shipment number mapped to that order."
+        }
+      },
+      "required": [
+        "warehouse_code",
+        "integration_shipment_nr"
+      ]
+    },
+    "v1GetShipmentResponse": {
+      "type": "object",
+      "properties": {
+        "fbpi_order_nr": {
+          "type": "string",
+          "description": "The order number associated with the shipment."
+        },
+        "awbs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ShipmentCourierAwb"
+          },
+          "description": "AWB details used for this shipment."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GetShipmentResponseItem"
+          },
+          "description": "Items included in this shipment."
+        }
+      },
+      "required": [
+        "fbpi_order_nr",
+        "awbs",
+        "items"
+      ]
+    },
+    "v1GetShipmentResponseItem": {
+      "type": "object",
+      "properties": {
+        "mp_item_nr": {
+          "type": "string",
+          "description": "Marketplace item number."
+        },
+        "partner_sku": {
+          "type": "string",
+          "description": "Partner SKU for that item.\n\nmore details about item?"
+        }
+      },
+      "required": [
+        "mp_item_nr",
+        "partner_sku"
+      ]
+    },
+    "v1IntegrationItemStatus": {
+      "type": "string",
+      "enum": [
+        "INTEGRATION_ITEM_STATUS_UNSPECIFIED",
+        "INTEGRATION_ITEM_STATUS_ACKNOWLEDGED",
+        "INTEGRATION_ITEM_STATUS_OUT_OF_STOCK",
+        "INTEGRATION_ITEM_STATUS_SHIPPED"
+      ],
+      "default": "INTEGRATION_ITEM_STATUS_UNSPECIFIED"
+    },
+    "v1ListFbpiOrdersFilters": {
+      "type": "object",
+      "properties": {
+        "warehouse_code": {
+          "type": "string"
+        },
+        "created_after": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "created_after / created_before: UTC timestamp in ISO-8601 format(YYYY-MM-DDTHH:MM:SSZ). Use\nthese to limit the returned orders to those created within the inclusive\ndate range. If omitted, no date filtering is applied."
+        },
+        "created_before": {
+          "type": "string",
+          "x-nullable": true
+        }
+      },
+      "required": [
+        "warehouse_code"
+      ]
+    },
+    "v1ListFbpiOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "next_token": {
+          "type": "string",
+          "title": "the next token that should be put in the query parameter\nof the next page request"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1GetFbpiOrderResponse"
+          },
+          "title": "this is an array of less than or 50 items"
+        }
+      },
+      "required": [
+        "next_token",
+        "orders"
+      ]
+    },
+    "v1MPItemStatus": {
+      "type": "string",
+      "enum": [
+        "MP_ITEM_STATUS_UNSPECIFIED",
+        "MP_ITEM_STATUS_CONFIRMED",
+        "MP_ITEM_STATUS_CANCELLED"
+      ],
+      "default": "MP_ITEM_STATUS_UNSPECIFIED"
+    },
+    "v1ShipmentCourierAwb": {
+      "type": "object",
+      "properties": {
+        "courier": {
+          "type": "string",
+          "description": "Courier name — 'noon' or your own logistics provider."
+        },
+        "awb_nr": {
+          "type": "string",
+          "description": "AWB number — either noon-generated or your own."
+        }
+      },
+      "required": [
+        "courier",
+        "awb_nr"
+      ]
+    },
+    "v1UpdateOrderRequest": {
+      "type": "object",
+      "properties": {
+        "fbpi_order_nr": {
+          "type": "string",
+          "description": "The FBPI order number to update."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1UpdateOrderRequestItem"
+          },
+          "description": "Array of items to cancel before shipment creation."
+        }
+      },
+      "required": [
+        "fbpi_order_nr",
+        "items"
+      ]
+    },
+    "v1UpdateOrderRequestItem": {
+      "type": "object",
+      "properties": {
+        "mp_item_nr": {
+          "type": "string",
+          "description": "Marketplace item number to exclude from fulfillment."
+        },
+        "status": {
+          "$ref": "#/definitions/v1UpdateOrderRequestItemStatus",
+          "description": "Status to mark item as out of stock."
+        }
+      },
+      "required": [
+        "mp_item_nr",
+        "status"
+      ]
+    },
+    "v1UpdateOrderRequestItemStatus": {
+      "type": "string",
+      "enum": [
+        "UPDATE_ORDER_REQUEST_ITEM_STATUS_UNSPECIFIED",
+        "UPDATE_ORDER_REQUEST_ITEM_STATUS_OUT_OF_STOCK"
+      ],
+      "default": "UPDATE_ORDER_REQUEST_ITEM_STATUS_UNSPECIFIED"
+    }
+  }
+}

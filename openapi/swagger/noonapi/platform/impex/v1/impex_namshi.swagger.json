@@ -1,0 +1,297 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "ImpexService"
+    }
+  ],
+  "host": "namshi-api-gateway.noon.partners",
+  "basePath": "/impex",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/export/category/list": {
+      "get": {
+        "summary": "GetExportCategoryList",
+        "description": "Get export category list",
+        "operationId": "ImpexService_GetExportCategoryList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetExportCategoryListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Export"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/export/create": {
+      "post": {
+        "summary": "CreateExport",
+        "description": "Create an export request",
+        "operationId": "ImpexService_CreateExport",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateExportResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateExportRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Export"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/export/status": {
+      "post": {
+        "summary": "GetExportStatus",
+        "description": "Get export details, status and download link",
+        "operationId": "ImpexService_GetExportStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetExportStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1GetExportStatusRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Export"
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "protobufNullValue": {
+      "type": "string",
+      "enum": [
+        "NULL_VALUE"
+      ],
+      "default": "NULL_VALUE",
+      "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\nThe JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "v1CreateExportRequest": {
+      "type": "object",
+      "properties": {
+        "export_category_code": {
+          "type": "string",
+          "title": "The category of data to export (must match an available export_category_code)"
+        },
+        "params": {
+          "type": "object",
+          "title": "Parameters for the export. Structure depends on the export category"
+        }
+      },
+      "title": "Request to create a new export job",
+      "required": [
+        "export_category_code",
+        "params"
+      ]
+    },
+    "v1CreateExportResponse": {
+      "type": "object",
+      "properties": {
+        "export_code": {
+          "type": "string",
+          "title": "Unique identifier for the created export job. Use this to check status and download results"
+        }
+      },
+      "title": "Response after successfully creating an export job",
+      "required": [
+        "export_code"
+      ]
+    },
+    "v1ExportCategory": {
+      "type": "object",
+      "properties": {
+        "export_category_code": {
+          "type": "string",
+          "title": "Unique identifier for the export category"
+        },
+        "params": {
+          "type": "object",
+          "title": "Additional parameters required for this export category (dynamic JSON structure)"
+        }
+      },
+      "title": "ExportCategory represents a category of data that can be exported",
+      "required": [
+        "export_category_code",
+        "params"
+      ]
+    },
+    "v1GetExportCategoryListResponse": {
+      "type": "object",
+      "properties": {
+        "export_categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ExportCategory"
+          },
+          "title": "List of all available export categories with their required parameters"
+        }
+      },
+      "title": "Response containing all available export categories",
+      "required": [
+        "export_categories"
+      ]
+    },
+    "v1GetExportStatusRequest": {
+      "type": "object",
+      "properties": {
+        "export_code": {
+          "type": "string",
+          "title": "The unique identifier of the export job to check"
+        }
+      },
+      "title": "Request to get the status of an export job",
+      "required": [
+        "export_code"
+      ]
+    },
+    "v1GetExportStatusResponse": {
+      "type": "object",
+      "properties": {
+        "export_code": {
+          "type": "string",
+          "title": "Unique identifier for the export job"
+        },
+        "export_category_code": {
+          "type": "string",
+          "title": "Category of data being exported"
+        },
+        "export_status": {
+          "type": "string",
+          "title": "Current status of the export (e.g., \"PENDING\", \"QUEUE\", \"RUNNING\", \"COMPLETE\", \"ERROR\")"
+        },
+        "params": {
+          "type": "string",
+          "title": "Parameters used for this export (JSON string representation)"
+        },
+        "project_code": {
+          "type": "string",
+          "title": "Project identifier associated with this export"
+        },
+        "created_by": {
+          "type": "string",
+          "title": "User that created this export"
+        },
+        "download_url": {
+          "type": "string",
+          "x-nullable": true,
+          "title": "Download URL for the exported file (only available when export_status is \"COMPLETE\")"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "Timestamp when the export was created"
+        }
+      },
+      "title": "Response containing the status and details of an export job",
+      "required": [
+        "export_code",
+        "export_category_code",
+        "export_status",
+        "params",
+        "project_code",
+        "created_by",
+        "created_at"
+      ]
+    }
+  }
+}

@@ -1,0 +1,1368 @@
+{
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "AsnService"
+    }
+  ],
+  "host": "namshi-api-gateway.noon.partners",
+  "basePath": "/inbound",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/shipment/create": {
+      "post": {
+        "summary": "CreateShipment",
+        "description": "Creates a new inbound shipment (ASN) header in CREATED status with no items.\nUse UpdateShipmentItems to add items after creation.\nIdempotent: retrying with the same exref_nr and shipment_type returns the existing ASN instead of creating a duplicate.",
+        "operationId": "AsnService_CreateShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateShipmentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateShipmentRequest"
+            }
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/catalog/items": {
+      "get": {
+        "summary": "ListEligibleItems",
+        "description": "Returns the partner's catalog items eligible for FBN inbound, along with their storage_type and image_url.\nOnly active items with a mapped pbarcode, title and an uploaded image are returned.",
+        "operationId": "AsnService_ListEligibleItems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListEligibleItemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "next_token",
+            "description": "Pagination token from a previous response. Omit for the first page.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "search.partner_sku",
+            "description": "Filter by partner SKU. Partial match supported.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page_size",
+            "description": "Number of items per page. Default 100, maximum 1000.",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "country_code",
+            "description": "Destination country code (e.g., AE, SA).",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Catalog"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/{asn_nr}/items": {
+      "get": {
+        "summary": "ListShipmentItems",
+        "description": "Returns a paginated list of items on an ASN.\nUse this to retrieve the full item list for a shipment.",
+        "operationId": "AsnService_ListShipmentItems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListShipmentItemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference number.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "next_token",
+            "description": "Pagination token from a previous response. Omit for the first page.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page_size",
+            "description": "Number of items per page. Default 1000, max 1000.",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment Items"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      },
+      "put": {
+        "summary": "UpdateShipmentItems",
+        "description": "Adds new items or updates quantities on existing items for a draft ASN (upsert).\nIf an item with the same partner_sku already exists, its quantity is updated; otherwise a new item is added.\nMaximum 1000 items per request. For larger shipments, split across multiple calls.\nASN must be in CREATED status.",
+        "operationId": "AsnService_UpdateShipmentItems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateShipmentItemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference to update items for. Must be in CREATED status.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AsnServiceUpdateShipmentItemsBody"
+            }
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment Items"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/{asn_nr}/items/delete": {
+      "post": {
+        "summary": "DeleteShipmentItems",
+        "description": "Removes one or more items from a draft ASN.\nMaximum 1000 items per request.\nASN must be in CREATED status. Items cannot be deleted after sealing.\nDeleting all items is allowed — the ASN remains in CREATED status.",
+        "operationId": "AsnService_DeleteShipmentItems",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteShipmentItemsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference to delete items from. Must be in CREATED status.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AsnServiceDeleteShipmentItemsBody"
+            }
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment Items"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/{asn_nr}/status": {
+      "put": {
+        "summary": "UpdateShipmentStatus",
+        "description": "Transitions an ASN between lifecycle statuses.\nSupported actions:\n- seal: Finalize a draft ASN. Requires at least one item (CREATED -> SEALED)\n- cancel: Cancel an ASN from CREATED, SEALED, or SCHEDULED (-> CANCELED)\n- reschedule: Move a scheduled ASN back to SEALED (SCHEDULED -> SEALED)",
+        "operationId": "AsnService_UpdateShipmentStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateShipmentStatusResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference to transition.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AsnServiceUpdateShipmentStatusBody"
+            }
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/{asn_nr}/schedule/slot_availability": {
+      "get": {
+        "summary": "GetSlotAvailability",
+        "description": "Returns eligible destination warehouses with their available check-in days and time slots.\nASN must be in SEALED status.\nOnly future dates with remaining capacity are returned.\nUse the returned warehouse code, date, and slot when calling ScheduleShipment.",
+        "operationId": "AsnService_GetSlotAvailability",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetSlotAvailabilityResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference. ASN must be in SEALED status.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Scheduling"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/{asn_nr}/schedule": {
+      "post": {
+        "summary": "ScheduleShipment",
+        "description": "Schedules a sealed ASN for inbound delivery at a specific warehouse, date, and time slot.\nThis also assigns the destination warehouse to the ASN.\nASN must be in SEALED status.\nState transition: SEALED -> SCHEDULED.\nFails if the warehouse is not eligible, the slot is no longer available, or the date is in the past.",
+        "operationId": "AsnService_ScheduleShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ScheduleShipmentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference to schedule. Must be in SEALED status.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AsnServiceScheduleShipmentBody"
+            }
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Scheduling"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/{asn_nr}": {
+      "get": {
+        "summary": "GetShipment",
+        "description": "Retrieves ASN details (header only).",
+        "operationId": "AsnService_GetShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetShipmentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference number.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      },
+      "put": {
+        "summary": "UpdateShipment",
+        "description": "Updates shipment metadata.\nAllowed while ASN is in CREATED, SEALED, or SCHEDULED status.\nCannot be updated once inbound has started, or if expired or canceled.",
+        "operationId": "AsnService_UpdateShipment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateShipmentResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "asn_nr",
+            "description": "ASN reference to update.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AsnServiceUpdateShipmentBody"
+            }
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    },
+    "/v1/shipment/list": {
+      "get": {
+        "summary": "ListShipments",
+        "description": "Returns a paginated list of shipment headers (without items).\nFilters are sent via query parameters, so GET is used.\nUse the nested filter fields to narrow results, e.g., `filter.status=...`.",
+        "operationId": "AsnService_ListShipments",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListShipmentsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "next_token",
+            "description": "Pagination token from a previous response. Omit for the first page.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "filter.status",
+            "description": "Filter by ASN status.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "ASN_STATUS_UNSPECIFIED",
+              "ASN_STATUS_CREATED",
+              "ASN_STATUS_SEALED",
+              "ASN_STATUS_SCHEDULED",
+              "ASN_STATUS_RECEIVING",
+              "ASN_STATUS_INBOUNDED",
+              "ASN_STATUS_CANCELED",
+              "ASN_STATUS_EXPIRED"
+            ],
+            "default": "ASN_STATUS_UNSPECIFIED"
+          },
+          {
+            "name": "page_size",
+            "description": "Number of records per page. Default 50, max 200.",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "country_code",
+            "description": "Destination country code (e.g., AE, SA).",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Project",
+            "description": "Project identifier",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Shipment"
+        ],
+        "security": [
+          {
+            "X-Project": []
+          }
+        ],
+        "x-max-requests": 1500,
+        "x-time-window": 60,
+        "x-burst": 1500,
+        "x-burst-time-window": 60
+      }
+    }
+  },
+  "definitions": {
+    "AsnServiceDeleteShipmentItemsBody": {
+      "type": "object",
+      "properties": {
+        "partner_skus": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of partner_sku to delete. Maximum 1000 per request."
+        }
+      },
+      "required": [
+        "partner_skus"
+      ]
+    },
+    "AsnServiceScheduleShipmentBody": {
+      "type": "object",
+      "properties": {
+        "dst_warehouse_code": {
+          "type": "string",
+          "description": "Destination warehouse code. Use the GetSlotAvailability API to get eligible warehouses."
+        },
+        "schedule_date": {
+          "type": "string",
+          "description": "Requested schedule date. Format: YYYY-MM-DD."
+        },
+        "schedule_slot": {
+          "$ref": "#/definitions/v1TimeSlot",
+          "description": "Requested time slot from GetSlotAvailability."
+        }
+      },
+      "required": [
+        "dst_warehouse_code",
+        "schedule_date",
+        "schedule_slot"
+      ]
+    },
+    "AsnServiceUpdateShipmentBody": {
+      "type": "object",
+      "properties": {
+        "misc": {
+          "type": "object",
+          "description": "Additional metadata (e.g., 3PL flags). Schema not yet finalized —\nwill be replaced with a typed message once requirements are confirmed."
+        }
+      },
+      "required": [
+        "misc"
+      ]
+    },
+    "AsnServiceUpdateShipmentItemsBody": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ShipmentItem"
+          },
+          "description": "List of items to add or update. Maximum 1000 items per request."
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "AsnServiceUpdateShipmentStatusBody": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/definitions/v1StatusAction",
+          "description": "Action to perform."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {},
+      "required": [
+        "type_url",
+        "value"
+      ]
+    },
+    "protobufNullValue": {
+      "type": "string",
+      "enum": [
+        "NULL_VALUE"
+      ],
+      "default": "NULL_VALUE",
+      "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\nThe JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "status_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "typeLatLng": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The latitude in degrees. It must be in the range [-90.0, +90.0]."
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The longitude in degrees. It must be in the range [-180.0, +180.0]."
+        }
+      },
+      "description": "An object that represents a latitude/longitude pair. This is expressed as a\npair of doubles to represent degrees latitude and degrees longitude. Unless\nspecified otherwise, this must conform to the\n<a href=\"http://www.unoosa.org/pdf/icg/2012/template/WGS_84.pdf\">WGS84\nstandard</a>. Values must be within normalized ranges.",
+      "required": [
+        "latitude",
+        "longitude"
+      ]
+    },
+    "v1AsnStatus": {
+      "type": "string",
+      "enum": [
+        "ASN_STATUS_UNSPECIFIED",
+        "ASN_STATUS_CREATED",
+        "ASN_STATUS_SEALED",
+        "ASN_STATUS_SCHEDULED",
+        "ASN_STATUS_RECEIVING",
+        "ASN_STATUS_INBOUNDED",
+        "ASN_STATUS_CANCELED",
+        "ASN_STATUS_EXPIRED"
+      ],
+      "default": "ASN_STATUS_UNSPECIFIED",
+      "title": "ASN status values"
+    },
+    "v1CreateShipmentRequest": {
+      "type": "object",
+      "properties": {
+        "shipment_type": {
+          "$ref": "#/definitions/v1ShipmentType",
+          "description": "Type of shipment."
+        },
+        "exref_nr": {
+          "type": "string",
+          "description": "Partner's external reference for the ASN (e.g., PO number).\nMust be unique per shipment_type within your account."
+        },
+        "country_code": {
+          "type": "string",
+          "description": "Destination country code (e.g., AE, SA)."
+        }
+      },
+      "required": [
+        "shipment_type",
+        "exref_nr",
+        "country_code"
+      ]
+    },
+    "v1CreateShipmentResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "The created shipment header."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1DeleteShipmentItemsResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "Updated shipment header."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1DeliveryType": {
+      "type": "string",
+      "enum": [
+        "DELIVERY_TYPE_UNSPECIFIED",
+        "DELIVERY_TYPE_DROP_OFF",
+        "DELIVERY_TYPE_PICKUP"
+      ],
+      "default": "DELIVERY_TYPE_UNSPECIFIED",
+      "title": "Delivery type values"
+    },
+    "v1EligibleItem": {
+      "type": "object",
+      "properties": {
+        "partner_sku": {
+          "type": "string",
+          "description": "Partner SKU identifier."
+        },
+        "sku": {
+          "type": "string",
+          "description": "Internal noon SKU."
+        },
+        "title": {
+          "type": "string",
+          "description": "Product title."
+        },
+        "storage_type": {
+          "$ref": "#/definitions/v1StorageType",
+          "description": "Storage type if known. STORAGE_TYPE_UNSPECIFIED if not yet classified."
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Product image URL."
+        }
+      },
+      "required": [
+        "partner_sku",
+        "sku",
+        "title",
+        "storage_type",
+        "image_url"
+      ]
+    },
+    "v1EligibleItemSearch": {
+      "type": "object",
+      "properties": {
+        "partner_sku": {
+          "type": "string",
+          "description": "Filter by partner SKU. Partial match supported."
+        }
+      },
+      "required": [
+        "partner_sku"
+      ]
+    },
+    "v1GetShipmentResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "Shipment details."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1GetSlotAvailabilityResponse": {
+      "type": "object",
+      "properties": {
+        "warehouses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1WarehouseAvailability"
+          },
+          "description": "List of eligible warehouses with their available check-in days and slots.\nThe list is capped server-side and will contain at most 100 warehouses."
+        }
+      },
+      "required": [
+        "warehouses"
+      ]
+    },
+    "v1ListEligibleItemsResponse": {
+      "type": "object",
+      "properties": {
+        "next_token": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Token to fetch the next page. Empty string if there are no more pages."
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1EligibleItem"
+          },
+          "description": "List of eligible catalog items for this page (at most page_size items, max 1000)."
+        },
+        "total_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of eligible items across all pages."
+        }
+      },
+      "required": [
+        "items",
+        "total_count"
+      ]
+    },
+    "v1ListShipmentItemsResponse": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ShipmentItemDetail"
+          },
+          "description": "List of items on this ASN with full product details."
+        },
+        "next_token": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Token to fetch the next page. Null if this is the last page."
+        },
+        "total_sku_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of distinct SKUs on this ASN (across all pages)."
+        }
+      },
+      "required": [
+        "items",
+        "total_sku_count"
+      ]
+    },
+    "v1ListShipmentsResponse": {
+      "type": "object",
+      "properties": {
+        "next_token": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Token to fetch the next page. Empty string if there are no more pages."
+        },
+        "shipments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ShipmentHeader"
+          },
+          "description": "List of shipment headers (without items). At most page_size shipments are returned per page (max 200)."
+        },
+        "total_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of shipments for this partner."
+        }
+      },
+      "required": [
+        "shipments",
+        "total_count"
+      ]
+    },
+    "v1ScheduleDay": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Available date. Format: YYYY-MM-DD."
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1TimeSlot"
+          },
+          "description": "Available time slots for that date.\nMaximum 8 slots per day."
+        }
+      },
+      "required": [
+        "date",
+        "slots"
+      ]
+    },
+    "v1ScheduleShipmentResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "Updated shipment header with warehouse and schedule details."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1ShipmentFilter": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/v1AsnStatus",
+          "description": "Filter by ASN status."
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "v1ShipmentHeader": {
+      "type": "object",
+      "properties": {
+        "asn_nr": {
+          "type": "string",
+          "description": "ASN reference number."
+        },
+        "exref_nr": {
+          "type": "string",
+          "description": "External reference number."
+        },
+        "shipment_type": {
+          "$ref": "#/definitions/v1ShipmentType",
+          "description": "Type of shipment."
+        },
+        "status": {
+          "$ref": "#/definitions/v1AsnStatus",
+          "description": "Current ASN status."
+        },
+        "country_code": {
+          "type": "string",
+          "description": "Country code provided during shipment creation."
+        },
+        "dst_warehouse_code": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Destination FBN warehouse code. Null until scheduled."
+        },
+        "expected_qty": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Expected total quantity across all items."
+        },
+        "schedule_date": {
+          "type": "string",
+          "x-nullable": true,
+          "description": "Scheduled inbound date (YYYY-MM-DD). Null if not scheduled."
+        },
+        "schedule_slot": {
+          "$ref": "#/definitions/v1TimeSlot",
+          "description": "Scheduled time slot. Null if not scheduled."
+        },
+        "delivery_type": {
+          "$ref": "#/definitions/v1DeliveryType",
+          "description": "Delivery type (e.g., drop-off or pickup). Defaults to DROP_OFF for v1."
+        },
+        "qty_received": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Quantity physically received at the warehouse. Populated after inbounding."
+        },
+        "qty_putaway": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Quantity successfully put away in the warehouse. Populated after putaway."
+        },
+        "total_sku_count": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total number of distinct SKUs on this ASN."
+        },
+        "created_at": {
+          "type": "string",
+          "description": "Creation timestamp. Format: ISO 8601 (e.g., \"2026-03-09T14:30:00Z\")."
+        },
+        "updated_at": {
+          "type": "string",
+          "description": "Last update timestamp. Format: ISO 8601 (e.g., \"2026-03-09T14:30:00Z\")."
+        }
+      },
+      "required": [
+        "asn_nr",
+        "exref_nr",
+        "shipment_type",
+        "status",
+        "country_code",
+        "expected_qty",
+        "schedule_slot",
+        "delivery_type",
+        "qty_received",
+        "qty_putaway",
+        "total_sku_count",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "v1ShipmentItem": {
+      "type": "object",
+      "properties": {
+        "partner_sku": {
+          "type": "string",
+          "description": "Partner SKU identifier."
+        },
+        "qty": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Quantity of the item."
+        },
+        "storage_type": {
+          "$ref": "#/definitions/v1StorageType",
+          "description": "Storage type. Set by the partner or pre-determined from catalog."
+        }
+      },
+      "required": [
+        "partner_sku",
+        "qty",
+        "storage_type"
+      ]
+    },
+    "v1ShipmentItemDetail": {
+      "type": "object",
+      "properties": {
+        "partner_sku": {
+          "type": "string",
+          "description": "Partner SKU identifier."
+        },
+        "sku": {
+          "type": "string",
+          "description": "Internal noon SKU."
+        },
+        "title": {
+          "type": "string",
+          "description": "Product title."
+        },
+        "qty": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Quantity of the item."
+        },
+        "storage_type": {
+          "$ref": "#/definitions/v1StorageType",
+          "description": "Storage type."
+        },
+        "image_url": {
+          "type": "string",
+          "description": "Product image URL."
+        }
+      },
+      "required": [
+        "partner_sku",
+        "sku",
+        "title",
+        "qty",
+        "storage_type",
+        "image_url"
+      ]
+    },
+    "v1ShipmentType": {
+      "type": "string",
+      "enum": [
+        "SHIPMENT_TYPE_UNSPECIFIED",
+        "SHIPMENT_TYPE_FBN_GLOBAL"
+      ],
+      "default": "SHIPMENT_TYPE_UNSPECIFIED",
+      "title": "Shipment type values"
+    },
+    "v1StatusAction": {
+      "type": "string",
+      "enum": [
+        "STATUS_ACTION_UNSPECIFIED",
+        "STATUS_ACTION_SEAL",
+        "STATUS_ACTION_CANCEL",
+        "STATUS_ACTION_RESCHEDULE"
+      ],
+      "default": "STATUS_ACTION_UNSPECIFIED",
+      "title": "Status transition action values"
+    },
+    "v1StorageType": {
+      "type": "string",
+      "enum": [
+        "STORAGE_TYPE_UNSPECIFIED",
+        "STORAGE_TYPE_STANDARD",
+        "STORAGE_TYPE_OVERSIZE",
+        "STORAGE_TYPE_BULKY"
+      ],
+      "default": "STORAGE_TYPE_UNSPECIFIED",
+      "title": "Storage type values"
+    },
+    "v1TimeSlot": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "description": "Slot start time. Format: HH:MM (e.g., \"08:00\")."
+        },
+        "end": {
+          "type": "string",
+          "description": "Slot end time. Format: HH:MM (e.g., \"12:00\")."
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ]
+    },
+    "v1UpdateShipmentItemsResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "Updated shipment header."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1UpdateShipmentResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "The updated shipment header."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1UpdateShipmentStatusResponse": {
+      "type": "object",
+      "properties": {
+        "shipment": {
+          "$ref": "#/definitions/v1ShipmentHeader",
+          "description": "Updated shipment header."
+        }
+      },
+      "required": [
+        "shipment"
+      ]
+    },
+    "v1Warehouse": {
+      "type": "object",
+      "properties": {
+        "warehouse_code": {
+          "type": "string",
+          "description": "Warehouse code."
+        },
+        "name": {
+          "type": "string",
+          "description": "Warehouse name."
+        },
+        "address": {
+          "type": "string",
+          "description": "Street address."
+        },
+        "city": {
+          "type": "string",
+          "description": "City."
+        },
+        "location": {
+          "$ref": "#/definitions/typeLatLng",
+          "description": "Warehouse location (latitude and longitude)."
+        }
+      },
+      "required": [
+        "warehouse_code",
+        "name",
+        "address",
+        "city",
+        "location"
+      ]
+    },
+    "v1WarehouseAvailability": {
+      "type": "object",
+      "properties": {
+        "warehouse": {
+          "$ref": "#/definitions/v1Warehouse",
+          "description": "Eligible warehouse."
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ScheduleDay"
+          },
+          "description": "Available upcoming check-in days and time slots for this warehouse (max 30 days per warehouse)."
+        }
+      },
+      "required": [
+        "warehouse",
+        "days"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "X-Project": {
+      "type": "apiKey",
+      "name": "X-Project",
+      "in": "header"
+    }
+  }
+}
