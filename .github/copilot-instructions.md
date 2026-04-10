@@ -32,6 +32,7 @@ Repository file responsibilities:
 
 Rules for adding a new service file such as `fbpi`, `pricing`, or `stock`:
 - Add the service under `src/noonapi/services/<service>.py`.
+- Add service-specific request/response models under `src/noonapi/models/<service>.py` when the service has structured request bodies or responses.
 - Follow the same constructor pattern as `auth.py` where possible.
 - Keep methods explicit and readable.
 - Prefer small hand-written wrappers over generic abstractions.
@@ -51,6 +52,7 @@ What not to add:
 
 Expected change set when adding a service:
 - Add `src/noonapi/services/<service>.py`.
+- Add `src/noonapi/models/<service>.py` if typed models are needed for that service.
 - Update `src/noonapi/services/__init__.py`.
 - Update `src/noonapi/session.py` if the new service should be exposed as `session.<service>`.
 - Only touch `src/noonapi/constants.py` if a shared endpoint helper is genuinely needed.
@@ -62,6 +64,17 @@ Swagger usage instructions:
 - Do not guess or invent service URL prefixes manually.
 - Convert that information into SDK code that matches the existing codebase rather than mirroring swagger mechanically.
 - If swagger and current SDK style conflict, prioritize the existing SDK style and keep the wrapper readable.
+
+Model instructions:
+- Models are for representing structured request bodies and structured responses for a specific service.
+- Keep models scoped by service in `src/noonapi/models/<service>.py` instead of creating one large shared models file.
+- Use standard-library types only without external dependencies.
+- Prefer `dataclass` models for request and response objects.
+- Prefer `Enum` for known swagger enum values.
+- Request models should provide a small `to_dict()` method for serialization.
+- Response models should provide a `from_dict()` constructor for parsing SDK responses.
+- Do not use loose `dict[str, Any]` in the public API when a stable structured model can be provided.
+- Keep models focused on the swagger-defined shapes for that service and avoid unrelated abstractions.
 
 Review instructions for SDK/swagger sync:
 - When reviewing a service change, compare the service file against the synced swagger for that same service.

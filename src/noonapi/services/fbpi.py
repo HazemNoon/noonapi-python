@@ -15,6 +15,21 @@ from ..constants import (
     fbpi_list_orders_url,
     fbpi_update_order_url,
 )
+from ..models.fbpi import (
+    FbpiActionResponse,
+    FbpiAddShipmentCourierAwbsRequest,
+    FbpiCancelShipmentRequest,
+    FbpiCreateShipmentRequest,
+    FbpiGetFbpiOrderCustomerDataResponse,
+    FbpiGetFbpiOrderResponse,
+    FbpiGetNoonLogisticsAwbsRequest,
+    FbpiGetNoonLogisticsAwbsResponse,
+    FbpiGetShipmentRequest,
+    FbpiGetShipmentResponse,
+    FbpiListOrdersFilters,
+    FbpiListOrdersResponse,
+    FbpiUpdateOrderRequest,
+)
 from ..errors import NoonApiError
 
 if TYPE_CHECKING:
@@ -24,96 +39,110 @@ if TYPE_CHECKING:
 class FbpiService:
     """
     FBPI service.
-
-    Hand-written service wrapper based on the synced swagger definitions while
-    following the same SDK style as the existing auth service.
+    - Creates and manages FBPI shipments
+    - Retrieves FBPI orders, shipment details, and customer details
+    - Updates orders and fetches noon logistics AWBs
     """
 
     def __init__(self, session: "NoonSession") -> None:
         self._session = session
 
-    def create_shipment(self, body: dict[str, Any]) -> dict[str, Any]:
+    def create_shipment(self, request: FbpiCreateShipmentRequest) -> FbpiActionResponse:
         res = self._session.request(
             "POST",
             fbpi_create_shipment_url(),
-            json=body,
+            json=request.to_dict(),
         )
-        return self._decode_json_response(res)
+        return self._decode_action_response(res)
 
-    def add_shipment_courier_awbs(self, body: dict[str, Any]) -> dict[str, Any]:
+    def add_shipment_courier_awbs(
+        self, request: FbpiAddShipmentCourierAwbsRequest
+    ) -> FbpiActionResponse:
         res = self._session.request(
             "POST",
             fbpi_add_shipment_courier_awbs_url(),
-            json=body,
+            json=request.to_dict(),
         )
-        return self._decode_json_response(res)
+        return self._decode_action_response(res)
 
-    def cancel_shipment(self, body: dict[str, Any]) -> dict[str, Any]:
+    def cancel_shipment(self, request: FbpiCancelShipmentRequest) -> FbpiActionResponse:
         res = self._session.request(
             "POST",
             fbpi_cancel_shipment_url(),
-            json=body,
+            json=request.to_dict(),
         )
-        return self._decode_json_response(res)
+        return self._decode_action_response(res)
 
-    def get_shipment(self, body: dict[str, Any]) -> dict[str, Any]:
+    def get_shipment(self, request: FbpiGetShipmentRequest) -> FbpiGetShipmentResponse:
         res = self._session.request(
             "POST",
             fbpi_get_shipment_url(),
-            json=body,
+            json=request.to_dict(),
         )
-        return self._decode_json_response(res)
+        return self._decode_model_response(res, FbpiGetShipmentResponse)
 
-    def get_noon_logistics_awbs(self, body: dict[str, Any]) -> dict[str, Any]:
+    def get_noon_logistics_awbs(
+        self, request: FbpiGetNoonLogisticsAwbsRequest
+    ) -> FbpiGetNoonLogisticsAwbsResponse:
         res = self._session.request(
             "POST",
             fbpi_get_noon_logistics_awbs_url(),
-            json=body,
+            json=request.to_dict(),
         )
-        return self._decode_json_response(res)
+        return self._decode_model_response(res, FbpiGetNoonLogisticsAwbsResponse)
 
-    def get_fbpi_order(self, fbpi_order_nr: str) -> dict[str, Any]:
+    def get_fbpi_order(self, fbpi_order_nr: str) -> FbpiGetFbpiOrderResponse:
         res = self._session.request(
             "GET",
             fbpi_get_order_url(fbpi_order_nr),
         )
-        return self._decode_json_response(res)
+        return self._decode_model_response(res, FbpiGetFbpiOrderResponse)
 
-    def list_fbpi_orders(self, filters: dict[str, Any], *, next_token: str) -> dict[str, Any]:
+    def list_fbpi_orders(
+        self, filters: FbpiListOrdersFilters, *, next_token: str
+    ) -> FbpiListOrdersResponse:
         res = self._session.request(
             "POST",
             fbpi_list_orders_url(),
-            json=filters,
+            json=filters.to_dict(),
             params={"next_token": next_token},
         )
-        return self._decode_json_response(res)
+        return self._decode_model_response(res, FbpiListOrdersResponse)
 
-    def get_fbpi_order_customer_data(self, fbpi_order_nr: str) -> dict[str, Any]:
+    def get_fbpi_order_customer_data(
+        self, fbpi_order_nr: str
+    ) -> FbpiGetFbpiOrderCustomerDataResponse:
         res = self._session.request(
             "GET",
             fbpi_get_order_customer_data_url(fbpi_order_nr),
         )
-        return self._decode_json_response(res)
+        return self._decode_model_response(res, FbpiGetFbpiOrderCustomerDataResponse)
 
-    def update_order(self, body: dict[str, Any]) -> dict[str, Any]:
+    def update_order(self, request: FbpiUpdateOrderRequest) -> FbpiActionResponse:
         res = self._session.request(
             "POST",
             fbpi_update_order_url(),
-            json=body,
+            json=request.to_dict(),
         )
-        return self._decode_json_response(res)
+        return self._decode_action_response(res)
 
-    def _decode_json_response(self, res: requests.Response) -> dict[str, Any]:
+    def _decode_action_response(self, res: requests.Response) -> FbpiActionResponse:
         self._raise_for_error(res)
+        return FbpiActionResponse.from_dict(self._decode_json_dict(res))
 
+    def _decode_model_response(
+        self, res: requests.Response, model_cls: type[Any]
+    ) -> Any:
+        self._raise_for_error(res)
+        return model_cls.from_dict(self._decode_json_dict(res))
+
+    @staticmethod
+    def _decode_json_dict(res: requests.Response) -> dict[str, Any]:
         data = res.json()
-        if not isinstance(data, dict):
-            raise NoonApiError(
-                http_status=200,
-                message=f"Unexpected FBPI response type: {type(data)}",
-            )
+        if isinstance(data, dict):
+            return data
 
-        return data
+        raise NoonApiError(http_status=200, message=f"Unexpected FBPI response type: {type(data)}")
 
     @staticmethod
     def _raise_for_error(res: requests.Response) -> None:
