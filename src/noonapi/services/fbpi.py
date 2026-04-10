@@ -135,12 +135,14 @@ class FbpiService:
         return model_cls.from_dict(self._decode_json_dict(res))
 
     @staticmethod
-    def _decode_json_dict(res: requests.Response) -> dict[str, Any]:
-        data = res.json()
-        if isinstance(data, dict):
-            return data
-
-        raise NoonApiError(http_status=200, message=f"Unexpected FBPI response type: {type(data)}")
+    def _decode_json_dict(res: requests.Response) -> Any:
+        try:
+            return res.json()
+        except Exception as err:
+            raise NoonApiError(
+                http_status=res.status_code,
+                message=res.text,
+            ) from err
 
     @staticmethod
     def _raise_for_error(res: requests.Response) -> None:
