@@ -15,6 +15,7 @@ from ..constants import (
     fbpi_list_orders_url,
     fbpi_update_order_url,
 )
+from ..errors import NoonApiError
 from ..models.fbpi import (
     FbpiActionResponse,
     FbpiAddShipmentCourierAwbsRequest,
@@ -30,7 +31,6 @@ from ..models.fbpi import (
     FbpiListOrdersResponse,
     FbpiUpdateOrderRequest,
 )
-from ..errors import NoonApiError
 
 if TYPE_CHECKING:
     from ..session import NoonSession
@@ -44,7 +44,7 @@ class FbpiService:
     - Updates orders and fetches noon logistics AWBs
     """
 
-    def __init__(self, session: "NoonSession") -> None:
+    def __init__(self, session: NoonSession) -> None:
         self._session = session
 
     def create_shipment(self, request: FbpiCreateShipmentRequest) -> FbpiActionResponse:
