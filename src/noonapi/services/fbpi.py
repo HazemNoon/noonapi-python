@@ -130,9 +130,7 @@ class FbpiService:
         self._raise_for_error(res)
         return FbpiActionResponse.from_dict(self._decode_json_dict(res))
 
-    def _decode_model_response(
-        self, res: requests.Response, model_cls: type[Any]
-    ) -> Any:
+    def _decode_model_response(self, res: requests.Response, model_cls: type[Any]) -> Any:
         self._raise_for_error(res)
         return model_cls.from_dict(self._decode_json_dict(res))
 
