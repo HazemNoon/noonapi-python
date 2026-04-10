@@ -60,15 +60,13 @@ class AuthService:
     def refresh(self) -> None:
         self.login()
 
-    def whoami(self) -> dict[str, Any]:
+    def whoami(self) -> Any:
         res = self._http.get(identity_whoami_url(), timeout=self._timeout_s)
         self._raise_for_error(res)
-
-        data = res.json()
-        if not isinstance(data, dict):
-            raise NoonApiError(http_status=200, message=f"Unexpected whoami response: {type(data)}")
-
-        return data
+        try:
+            return res.json()
+        except Exception as err:
+            raise NoonApiError(http_status=res.status_code, message=res.text) from err
 
     @staticmethod
     def _raise_for_error(res: requests.Response) -> None:
