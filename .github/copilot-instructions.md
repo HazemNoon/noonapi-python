@@ -63,5 +63,15 @@ Swagger usage instructions:
 - Convert that information into SDK code that matches the existing codebase rather than mirroring swagger mechanically.
 - If swagger and current SDK style conflict, prioritize the existing SDK style and keep the wrapper readable.
 
+Review instructions for SDK/swagger sync:
+- When reviewing a service change, compare the service file against the synced swagger for that same service.
+- Check that every implemented SDK method maps to a real swagger endpoint.
+- Check that URLs match the swagger base path and route exactly, including version segments.
+- Check that HTTP methods match the swagger.
+- Check that path params, query params, headers, and request body placement match the swagger.
+- Check that newly added swagger endpoints are not missing from the SDK when the PR claims the service is up to date.
+- Check that removed or renamed swagger endpoints are not still exposed by the SDK.
+- If the SDK and swagger are out of sync, call that out clearly in the review and reference the affected service file and swagger file with the corresponding mismatches.
+
 Core constraint:
 - The goal is for Copilot-assisted service code to look like it belongs in this repository already, with `auth.py` as the example, and without introducing parallel infrastructure.

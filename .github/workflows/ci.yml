@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies (dev group)
         run: uv sync --group dev
 
+      - name: Sync swagger assets
+        run: bash scripts/sync_swagger.sh
+
       - name: Ruff (lint)
         run: uv run ruff check .
 
